@@ -1,6 +1,6 @@
 # Wellness Check-In
 
-A personal daily wellness PWA built for just my sister, she recently did a surgery and she's in her recovering stage. Every morning she receives a push notification, opens the app, hears her brother's voice(which is me guys🤩), answers 3 questions by tapping buttons, and hears a farewell message. No login friction. No App Store — just a link she adds to her home screen.
+A personal daily wellness PWA built for just my sister. she recently did a surgery and she is in her recovery stage. Every morning she receives a push notification, opens the app, hears her brother's voice(which is me guys🤩), answers 3 questions by tapping buttons, and hears a farewell message. No login friction. No App Store — just a link she adds to her home screen.
 
 ## Users
 
