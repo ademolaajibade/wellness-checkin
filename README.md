@@ -1,37 +1,113 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Wellness Check-In
+
+A personal daily wellness PWA built for a patient recovering from surgery. Every morning she receives a push notification, opens the app, hears her brother's voice, answers 3 questions by tapping buttons, and hears a farewell message. No login friction. No App Store — just a link she adds to her home screen.
+
+## Users
+
+- **Admin (brother)** — manages questions, uploads voice recordings, views responses
+- **Patient (sister)** — completes her daily check-in
+
+## Tech Stack
+
+| Layer | Tool |
+|---|---|
+| Framework | Next.js 14, App Router, TypeScript |
+| Styling | Tailwind CSS |
+| Database | MongoDB Atlas via Mongoose |
+| Auth | iron-session (PIN for patient, email + password for admin) |
+| Push notifications | Firebase Cloud Messaging (FCM) Web Push |
+| Audio storage | Firebase Storage |
+| Offline support | Workbox (via next-pwa) + idb-keyval |
+| Deployment | Vercel |
+| Cron | Vercel Cron Jobs |
+
+## Features
+
+- **Voice-first experience** — greeting and farewell audio recorded by her brother plays automatically
+- **3-question daily check-in** — simple tap buttons: Great / Okay / Not well
+- **Offline support** — answers queue locally and sync when back online
+- **Push notifications** — scheduled daily reminder via Firebase Cloud Messaging
+- **Admin dashboard** — response history, calendar heatmap, question editor, recording uploader
+- **PWA installable** — works on iOS (16.4+) and Android via Add to Home Screen
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- MongoDB Atlas cluster
+- Firebase project (Firestore + Cloud Messaging + Storage)
+
+### Install
+
+```bash
+npm install
+```
+
+### Environment Variables
+
+Create `.env.local`:
+
+```bash
+# Database
+MONGODB_URI=mongodb+srv://...
+
+# Auth
+IRON_SESSION_SECRET=           # 32+ random characters
+
+# Firebase (browser)
+NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+NEXT_PUBLIC_FIREBASE_APP_ID=
+NEXT_PUBLIC_VAPID_KEY=
+
+# Firebase (server)
+FIREBASE_SERVICE_ACCOUNT_JSON= # full JSON as single-line string
+
+# Vercel Cron auth
+CRON_SECRET=
+```
+
+### Seed the Database
+
+```bash
+npx ts-node scripts/seed.ts
+```
+
+Creates the admin user and patient user with default questions.
+
+### Run Locally
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Patient Flow
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Push notification arrives at scheduled time
+2. She taps → `/checkin` opens
+3. Greeting audio plays (her brother's voice)
+4. 3 questions presented one at a time with answer buttons
+5. Answers submitted → routed to `/done`
+6. Farewell audio plays
 
-## Learn More
+## Deployment
 
-To learn more about Next.js, take a look at the following resources:
+Deploys to Vercel. See the deployment checklist in the project docs before going live:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Set all env vars in Vercel dashboard
+- Add production domain to Firebase Authorized Domains
+- Allow `0.0.0.0/0` in MongoDB Atlas Network Access (Vercel uses dynamic IPs)
+- Set Firebase Storage rules to allow public read on `recordings/*`
+- Adjust Vercel cron time to match the patient's timezone
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Design
 
-## Deploy on Vercel
+Warm, personal, and calm — like a message from someone who loves you.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# wellness-checkin
+- Rose/pink color palette
+- Large touch targets (min 4rem height) — she may be groggy or in pain
+- Offline-first — every patient action works without a network connection
