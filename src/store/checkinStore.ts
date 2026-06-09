@@ -6,6 +6,7 @@ interface CheckinState {
   questionIndex: number
   questions: IQuestion[]
   answers: IAnswer[]
+  notes: string
   greetingUrl: string | null
   farewellUrl: string | null
   error: string | null
@@ -15,6 +16,7 @@ interface CheckinState {
   setRecordings: (greeting: string | null, farewell: string | null) => void
   addAnswer: (answer: IAnswer) => void
   nextQuestion: () => void
+  setNotes: (notes: string) => void
   reset: () => void
 }
 
@@ -23,6 +25,7 @@ const initialState = {
   questionIndex: 0,
   questions: [],
   answers: [],
+  notes: '',
   greetingUrl: null,
   farewellUrl: null,
   error: null,
@@ -42,6 +45,8 @@ export const useCheckinStore = create<CheckinState>((set) => ({
 
   nextQuestion: () =>
     set((state) => ({ questionIndex: state.questionIndex + 1 })),
+
+  setNotes: (notes) => set({ notes }),
 
   reset: () => set(initialState),
 }))

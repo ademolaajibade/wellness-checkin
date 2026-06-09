@@ -1,6 +1,6 @@
 'use client'
 
-import { ICheckinResponse, AnswerValue } from '@/types'
+import { ICheckinResponse } from '@/types'
 
 interface Props {
   responses: ICheckinResponse[]
@@ -8,19 +8,29 @@ interface Props {
   month: number
 }
 
-function getDaySentiment(response: ICheckinResponse | undefined): AnswerValue | null {
+type Sentiment = 'positive' | 'neutral' | 'concern'
+
+const CONCERN_COLORS = new Set(['rose', 'not_well'])
+const NEUTRAL_COLORS = new Set(['amber', 'okay'])
+
+function getDaySentiment(response: ICheckinResponse | undefined): Sentiment | null {
   if (!response) return null
-  const counts = { great: 0, okay: 0, not_well: 0 }
-  for (const a of response.answers) counts[a.answer]++
-  if (counts.not_well > 0) return 'not_well'
-  if (counts.okay > 0) return 'okay'
-  return 'great'
+  let hasConcern = false
+  let hasNeutral = false
+  for (const a of response.answers) {
+    const key = a.answerColor ?? a.answer
+    if (CONCERN_COLORS.has(key)) hasConcern = true
+    else if (NEUTRAL_COLORS.has(key)) hasNeutral = true
+  }
+  if (hasConcern) return 'concern'
+  if (hasNeutral) return 'neutral'
+  return 'positive'
 }
 
-const sentimentColor: Record<AnswerValue, string> = {
-  great: 'bg-green-200 text-green-800',
-  okay: 'bg-amber-200 text-amber-800',
-  not_well: 'bg-rose-200 text-rose-800',
+const sentimentColor: Record<Sentiment, string> = {
+  positive: 'bg-green-200 text-green-800',
+  neutral: 'bg-amber-200 text-amber-800',
+  concern: 'bg-rose-200 text-rose-800',
 }
 
 export default function ResponseCalendar({ responses, year, month }: Props) {
@@ -64,9 +74,9 @@ export default function ResponseCalendar({ responses, year, month }: Props) {
         })}
       </div>
       <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
-        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-green-200 inline-block" /> Great</span>
-        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-amber-200 inline-block" /> Okay</span>
-        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-rose-200 inline-block" /> Not well</span>
+        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-green-200 inline-block" /> Positive</span>
+        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-amber-200 inline-block" /> Neutral</span>
+        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-rose-200 inline-block" /> Concern</span>
       </div>
     </div>
   )

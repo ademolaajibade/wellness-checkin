@@ -38,8 +38,7 @@ export async function clearSession() {
 
 export async function requireAuth(role?: 'admin' | 'patient'): Promise<SessionData> {
   const session = await getSession()
-  console.log('Session data:', session)
-  if (!session.userId) throw new Error('Unauthorized')
+if (!session.userId) throw new Error('Unauthorized')
   if (role && session.role !== role) throw new Error('Forbidden')
   return { userId: session.userId, role: session.role! }
 }

@@ -23,7 +23,7 @@ export default function QuestionsPage() {
   return (
     <div className="max-w-xl space-y-4">
       <h2 className="text-xl font-bold text-gray-800">Daily Questions</h2>
-      <p className="text-sm text-gray-400">These are the 3 questions Sarah answers each morning.</p>
+      <p className="text-sm text-gray-400">These are the 3 questions Damilola answers each morning.</p>
       {loading ? (
         <div className="flex justify-center py-8"><Spinner /></div>
       ) : (

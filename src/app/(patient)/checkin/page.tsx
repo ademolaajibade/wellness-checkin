@@ -6,22 +6,33 @@ import AudioPlayer from '@/components/patient/AudioPlayer'
 import AnswerButton from '@/components/patient/AnswerButton'
 import ProgressDots from '@/components/patient/ProgressDots'
 import Spinner from '@/components/shared/Spinner'
-import { AnswerValue } from '@/types'
+import { DEFAULT_OPTIONS } from '@/types'
+
+const ANSWER_STYLES: Record<string, { bg: string; text: string; border: string }> = {
+  green:  { bg: 'bg-green-50',  text: 'text-green-700',  border: 'border-green-300' },
+  amber:  { bg: 'bg-amber-50',  text: 'text-amber-700',  border: 'border-amber-300' },
+  rose:   { bg: 'bg-rose-50',   text: 'text-rose-700',   border: 'border-rose-300'  },
+  blue:   { bg: 'bg-blue-50',   text: 'text-blue-700',   border: 'border-blue-300'  },
+  purple: { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-300'},
+}
 
 export default function CheckinPage() {
   const {
     step,
     questionIndex,
     questions,
+    answers,
+    notes,
     greetingUrl,
     greetingEnded,
     submitAnswer,
+    confirmSubmit,
+    setNotes,
     error,
   } = useCheckin()
 
   const currentQuestion = questions[questionIndex]
 
-  // Scroll to top on question change
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [questionIndex])
@@ -55,20 +66,29 @@ export default function CheckinPage() {
     )
   }
 
+  if (step === 'already_done') {
+    return (
+      <main className="flex min-h-dvh flex-col items-center justify-center bg-gradient-to-b from-rose-50 to-white px-6 gap-6">
+        <p className="text-5xl">🌸</p>
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">You already checked in today Sis</h1>
+          <p className="text-gray-400 text-sm">Come back tomorrow. Rest up 💕</p>
+        </div>
+      </main>
+    )
+  }
+
   if (step === 'greeting') {
     return (
       <main className="flex min-h-dvh flex-col items-center justify-center bg-gradient-to-b from-rose-50 to-white px-6 gap-8">
         <div className="text-center">
           <p className="text-4xl mb-3">🌸</p>
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">Good morning!</h1>
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">Good morning OLUWADAMILOLA!</h1>
           <p className="text-gray-400 text-sm">A message for you…</p>
         </div>
         <AudioPlayer url={greetingUrl} onEnded={greetingEnded} />
         {!greetingUrl && (
-          <button
-            onClick={greetingEnded}
-            className="text-sm text-rose-400 underline"
-          >
+          <button onClick={greetingEnded} className="text-sm text-rose-400 underline">
             Continue
           </button>
         )}
@@ -89,20 +109,74 @@ export default function CheckinPage() {
           </div>
 
           <div className="flex flex-col gap-3">
-            {(['great', 'okay', 'not_well'] as AnswerValue[]).map((value) => (
+            {(currentQuestion.options?.length ? currentQuestion.options : DEFAULT_OPTIONS).map((option) => (
               <AnswerButton
-                key={value}
-                value={value}
-                onClick={(v) =>
+                key={option.value}
+                option={option}
+                onClick={() =>
                   submitAnswer({
                     questionId: currentQuestion._id,
                     questionText: currentQuestion.text,
-                    answer: v,
+                    answer: option.value,
+                    answerColor: option.color,
                   })
                 }
               />
             ))}
           </div>
+        </div>
+      </main>
+    )
+  }
+
+  if (step === 'confirm') {
+    return (
+      <main className="flex min-h-dvh flex-col bg-gradient-to-b from-rose-50 to-white px-6 py-12">
+        <div className="flex-1 flex flex-col justify-center gap-8 max-w-sm mx-auto w-full">
+          <div className="text-center">
+            <p className="text-3xl mb-3">📋</p>
+            <h1 className="text-xl font-bold text-gray-800 mb-1">Does this look right?</h1>
+            <p className="text-sm text-gray-400">Tap Send when you're ready.</p>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            {answers.map((a) => {
+              const style = ANSWER_STYLES[a.answerColor ?? 'rose'] ?? ANSWER_STYLES.rose
+              const label =
+                DEFAULT_OPTIONS.find((o) => o.value === a.answer)?.label ?? a.answer
+              return (
+                <div
+                  key={a.questionId}
+                  className="rounded-2xl border border-gray-100 bg-white p-4 flex items-center justify-between gap-3 shadow-sm"
+                >
+                  <p className="text-sm text-gray-700 leading-snug flex-1">{a.questionText}</p>
+                  <span className={`shrink-0 rounded-full border px-3 py-1 text-xs font-semibold ${style.bg} ${style.text} ${style.border}`}>
+                    {label}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-500 mb-2">
+              Anything else on your mind? <span className="text-gray-400">(optional)</span>
+            </label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="How are you feeling overall…"
+              rows={3}
+              className="w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-300 resize-none"
+            />
+          </div>
+
+          <button
+            onClick={confirmSubmit}
+            className="w-full rounded-2xl bg-rose-500 text-white font-semibold py-4 text-base active:scale-95 transition-transform shadow-md"
+          >
+            Send 💕
+          </button>
         </div>
       </main>
     )
