@@ -5,6 +5,7 @@ const pwaConfig = {
   dest: 'public',
   disable: process.env.NODE_ENV === 'development',
   register: true,
+  customWorkerDir: 'worker',
   fallbacks: {
     document: '/offline.html',
   },
